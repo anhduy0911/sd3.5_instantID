@@ -126,7 +126,7 @@ T5_CONFIG = {
 class T5XXL:
     def __init__(self, model_folder: str, device: str = "cpu", dtype=torch.float32):
         with safe_open(
-            f"{model_folder}/t5xxl.safetensors", framework="pt", device="cpu"
+            f"{model_folder}/t5xxl_fp16.safetensors", framework="pt", device="cpu"
         ) as f:
             self.model = T5XXLModel(T5_CONFIG, device=device, dtype=dtype)
             load_into(f, self.model.transformer, "", device, dtype)
@@ -324,6 +324,7 @@ class SD3Inferencer:
         t5_out, t5_pooled = self.t5xxl.model.encode_token_weights(tokens["t5xxl"])
         lg_out = torch.cat([l_out, g_out], dim=-1)
         lg_out = torch.nn.functional.pad(lg_out, (0, 4096 - lg_out.shape[-1]))
+        # import IPython; IPython.embed(); exit()
         return torch.cat([lg_out, t5_out], dim=-2), torch.cat(
             (l_pooled, g_pooled), dim=-1
         )
